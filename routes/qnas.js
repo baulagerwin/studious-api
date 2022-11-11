@@ -1,10 +1,11 @@
+const auth = require("../middleware/auth");
 const validateObjectId = require("../middleware/validateObjectId");
 const { Subject } = require("../models/subject");
 const { QNA, validate } = require("../models/qna");
 const express = require("express");
 const router = express.Router();
 
-router.post("/", async (req, res) => {
+router.post("/", auth, async (req, res) => {
   const { error } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
@@ -14,6 +15,7 @@ router.post("/", async (req, res) => {
   const qna = new QNA({
     subject: {
       name: subject.name,
+      belongsTo: subject.belongsTo,
     },
     question: req.body.question,
     answer: req.body.answer,
@@ -23,19 +25,19 @@ router.post("/", async (req, res) => {
   res.send(result);
 });
 
-router.get("/", async (req, res) => {
-  const qnas = await QNA.find().sort("-_id");
+router.get("/", auth, async (req, res) => {
+  const qnas = await QNA.find({ belongsTo: req.user.email });
   res.send(qnas);
 });
 
-router.get("/:id", validateObjectId, async (req, res) => {
+router.get("/:id", [auth, validateObjectId], async (req, res) => {
   const qna = await QNA.findById(req.params.id);
   if (!qna) return res.status(404).send("QNA not found.");
 
   res.send(qna);
 });
 
-router.put("/:id", validateObjectId, async (req, res) => {
+router.put("/:id", [auth, validateObjectId], async (req, res) => {
   const { error } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
@@ -48,6 +50,7 @@ router.put("/:id", validateObjectId, async (req, res) => {
   qna.set({
     subject: {
       name: subject.name,
+      belongsTo: subject.belongsTo,
     },
     question: req.body.question,
     answer: req.body.answer,
@@ -57,7 +60,7 @@ router.put("/:id", validateObjectId, async (req, res) => {
   res.send(result);
 });
 
-router.delete("/:id", validateObjectId, async (req, res) => {
+router.delete("/:id", [auth, validateObjectId], async (req, res) => {
   const qna = await QNA.findById(req.params.id);
   if (!qna) return res.status(404).send("QNA not found.");
 

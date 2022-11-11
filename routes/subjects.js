@@ -1,33 +1,42 @@
+const auth = require("../middleware/auth");
 const validateObjectId = require("../middleware/validateObjectId");
 const { Subject, validate } = require("../models/subject");
+const { User } = require("../models/user");
 const express = require("express");
 const router = express.Router();
 
-router.post("/", async (req, res) => {
+router.post("/", auth, async (req, res) => {
   const { error } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
+  const user = await User.findOne({ email: req.user.email });
+  if (!user) return res.status(404).send("User not found.");
+
   const subject = new Subject({
     name: req.body.name,
+    belongsTo: user.email,
   });
 
   const result = await subject.save();
   res.send(result);
 });
 
-router.get("/", async (req, res) => {
-  const subjects = await Subject.find().sort({ name: 1 });
+router.get("/", auth, async (req, res) => {
+  const subjects = await Subject.find({ belongsTo: req.user.email }).select({
+    _id: 1,
+    name: 1,
+  });
   res.send(subjects);
 });
 
-router.get("/:id", validateObjectId, async (req, res) => {
+router.get("/:id", [auth, validateObjectId], async (req, res) => {
   const subject = await Subject.findById(req.params.id);
   if (!subject) return res.status(404).send("Subject not found.");
 
   res.send(subject);
 });
 
-router.put("/:id", validateObjectId, async (req, res) => {
+router.put("/:id", [auth, validateObjectId], async (req, res) => {
   const { error } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
@@ -40,7 +49,7 @@ router.put("/:id", validateObjectId, async (req, res) => {
   res.send(result);
 });
 
-router.delete("/:id", validateObjectId, async (req, res) => {
+router.delete("/:id", [auth, validateObjectId], async (req, res) => {
   const subject = await Subject.findById(req.params.id);
   if (!subject) return res.status(404).send("Subject not found.");
 

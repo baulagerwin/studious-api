@@ -1,4 +1,5 @@
 const Joi = require("joi");
+Joi.objectId = require("joi-objectid")(Joi);
 const mongoose = require("mongoose");
 
 const subjectSchema = new mongoose.Schema({
@@ -7,6 +8,10 @@ const subjectSchema = new mongoose.Schema({
     required: true,
     minlength: 3,
     maxlength: 255,
+  },
+  belongsTo: {
+    type: String,
+    required: true,
   },
 });
 
