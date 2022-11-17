@@ -19,6 +19,7 @@ const userSchema = new mongoose.Schema({
   username: {
     type: String,
     required: true,
+    unique: true,
     minlength: 2,
     maxlength: 55,
   },
@@ -38,7 +39,7 @@ const userSchema = new mongoose.Schema({
 });
 
 userSchema.methods.generateAuthToken = function () {
-  return jwt.sign({ email: this.email }, config.get("jwtPrivateKey"));
+  return jwt.sign({ username: this.username }, config.get("jwtPrivateKey"));
 };
 
 const User = mongoose.model("User", userSchema);
