@@ -11,9 +11,6 @@ router.post("/", async (req, res) => {
   let user = await User.findOne({ username: req.body.username });
   if (user) return res.status(400).send("Username already exist.");
 
-  user = await User.findOne({ email: req.body.email });
-  if (user) return res.status(400).send("Email already exist.");
-
   user = new User(
     _.pick(req.body, ["firstName", "lastName", "username", "email", "password"])
   );
@@ -26,6 +23,7 @@ router.post("/", async (req, res) => {
 
   res
     .header("x-auth-token", token)
+    .header("access-control-expose-headers", "x-auth-token")
     .send(_.pick(user, ["firstName", "lastName", "username", "email"]));
 });
 

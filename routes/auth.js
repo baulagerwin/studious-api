@@ -12,7 +12,8 @@ router.post("/", async (req, res) => {
   if (!user) return res.status(400).send("Invalid username.");
 
   let isPasswordValid = await bcrypt.compare(req.body.password, user.password);
-  if (!isPasswordValid) return res.status(400).send("Invalid password.");
+  if (!isPasswordValid)
+    return res.status(400).send("Invalid password.");
 
   const token = user.generateAuthToken();
   res.send(token);
@@ -20,7 +21,7 @@ router.post("/", async (req, res) => {
 
 function validate(emailAndPassword) {
   const schema = Joi.object({
-    email: Joi.string().min(2).max(55).email().required(),
+    username: Joi.string().min(2).max(55).required(),
     password: Joi.string().min(2).max(55).required(),
   });
 
