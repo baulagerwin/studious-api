@@ -1,1 +1,1 @@
-# studious-backend
+# studious-api

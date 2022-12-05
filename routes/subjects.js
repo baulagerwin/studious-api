@@ -9,12 +9,12 @@ router.post("/", auth, async (req, res) => {
   const { error } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
-  const user = await User.findOne({ email: req.user.email });
+  const user = await User.findOne({ username: req.user.username });
   if (!user) return res.status(404).send("User not found.");
 
   const subject = new Subject({
     name: req.body.name,
-    belongsTo: user.email,
+    belongsTo: user.username,
   });
 
   const result = await subject.save();
@@ -22,7 +22,7 @@ router.post("/", auth, async (req, res) => {
 });
 
 router.get("/", auth, async (req, res) => {
-  const subjects = await Subject.find({ belongsTo: req.user.email }).select({
+  const subjects = await Subject.find({ belongsTo: req.user.username }).select({
     _id: 1,
     name: 1,
   });

@@ -26,7 +26,7 @@ router.post("/", auth, async (req, res) => {
 });
 
 router.get("/", auth, async (req, res) => {
-  const qnas = await QNA.find({ belongsTo: req.user.email });
+  const qnas = await QNA.find({ belongsTo: req.user.username });
   res.send(qnas);
 });
 
